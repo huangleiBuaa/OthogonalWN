@@ -1,6 +1,12 @@
 -- Batch normalized googlenet
-require '../../../NNNetwork/module/spatial/Spatial_Scaling'
-require '../../../NNNetwork/module/spatial/cudnn_Spatial_Weight_BN'
+
+--[[
+--this model is originally from: https://github.com/soumith/imagenet-multiGPU.torch, for imageNet dataset
+--We do necessary process of the first layers tailored for the 32x32 input of Cifar
+--]]
+
+require '../../module/spatial/Spatial_Scaling'
+require '../../module/spatial/cudnn_Spatial_Weight_BN'
 
 
 local function inception(input_size, config)

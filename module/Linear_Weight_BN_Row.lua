@@ -10,22 +10,13 @@ function Linear_Weight_BN_Row:__init(inputSize,outputSize,orth_flag,unitLength_f
   
        ----if use unitLength, means the F_norm(W_i)=1 (like WeightNormalization style),
       -- if not, means the var(W_i)=1(like batchNormalization), The difference is 1/n
-   
-  
-
-
-
    if unitLength_flag ~= nil then
       assert(type(unitLength_flag) == 'boolean', 'unitLength_flag has to be true/false')
       self.unitLength_flag = unitLength_flag
    else
       self.unitLength_flag = true
    end
-
     self:reset()
-  
-  
-
 end
 
 
@@ -47,7 +38,6 @@ function Linear_Weight_BN_Row:reset(stdv)
       self.weight:uniform(-stdv, stdv)
      -- self.bias:uniform(-stdv, stdv)
    end
-
    return self
 end
 
@@ -65,7 +55,6 @@ function Linear_Weight_BN_Row:reset_orthogonal()
     local Q2, R2 = torch.qr(M2)
 
     self.weight:copy(Q1:narrow(2,1,n_min) * Q2:narrow(1,1,n_min)):mul(initScale)
-
    -- self.bias:zero()
 end
 
@@ -134,11 +123,7 @@ function Linear_Weight_BN_Row:updateGradInput(input, gradOutput)
 end
 
 function Linear_Weight_BN_Row:accGradParameters(input, gradOutput, scale)
---      if self.flag_inner_lr then
- --       scale = self.scale or 1.0
- --     else
         scale =scale or 1.0
- --     end
    if input:dim() == 2 then
       local n_output=self.weight:size(1)
       local n_input=self.weight:size(2)
@@ -159,25 +144,17 @@ function Linear_Weight_BN_Row:accGradParameters(input, gradOutput, scale)
       self.gradWeight:repeatTensor(self.buffer,1, n_input)
       self.gradWeight:cmul(self.W):mul(-1)
    
-
-   
         self.gradWeight:add(self.gradW)
         
         self.buffer:repeatTensor(self.std,1,n_input)    
         self.gradWeight:cmul(self.buffer)
-
-      
      -- self.gradBias:addmv(scale, gradOutput:t(), self.addBuffer)
    else
       error('input must be vector or matrix')
    end
-   
-
-   
 
 end
 
--- we do not need to accumulate parameters when sharing
 Linear_Weight_BN_Row.sharedAccUpdateGradParameters = Linear_Weight_BN_Row.accUpdateGradParameters
 
 

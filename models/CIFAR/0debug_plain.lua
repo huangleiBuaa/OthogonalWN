@@ -37,12 +37,6 @@ ConvBNReLU(n*4,n*8)
 ConvBNReLU(n*8,n*8)
 vgg:add(nn.SpatialAveragePooling(8,8,1,1))
 
--- In the last block of convolutions the inputs are smaller than
--- the kernels and cudnn doesn't handle that, have to use cunn
---backend = nn
---ConvBNReLU(n*8,n*8)
---ConvBNReLU(n*8,n*8)
---vgg:add(MaxPooling(2,2,2,2))
 vgg:add(nn.View(n*8))
 
 classifier = nn.Sequential()
@@ -70,8 +64,5 @@ end
 
 MSRinit(vgg)
 
--- check that we can propagate forward without errors
--- should get 16x10 tensor
---print(#vgg:cuda():forward(torch.CudaTensor(16,3,32,32)))
 
 return vgg

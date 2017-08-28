@@ -16,9 +16,14 @@
 --
 --  ************************************************************************
 
+--[[
+--  this model is originally from: https://github.com/szagoruyko/wide-residual-networks
+--    We replace the first SpatialConvolution layer with our Orthogonal rectangular weight layer
+--]]
+
+
 local nn = require 'nn'
 local utils = paths.dofile'utils.lua'
-require '../../../NNNetwork/module/spatial/Spatial_Scaling'
 require '../../../NNNetwork/module/spatial/cudnn_Spatial_Weight_DBN_Row'
 
 assert(opt and opt.depth)

@@ -10,6 +10,12 @@
 -- "Identity Mappings in Deep Residual Networks" (http://arxiv.org/abs/1603.05027)
 --
 
+--[[
+--  this model is originally from: https://github.com/facebook/fb.resnet.torch
+--]]
+
+
+
 local nn = require 'nn'
 require 'cunn'
 

@@ -10,12 +10,16 @@
 -- "Identity Mappings in Deep Residual Networks" (http://arxiv.org/abs/1603.05027)
 --
 
+
+--[[
+--  this model is originally from: https://github.com/facebook/fb.resnet.torch
+--    We replace the first SpatialConvolution layer with our Orthogonal rectangular weight layer
+--]]
+
 local nn = require 'nn'
 require 'cunn'
 require 'cudnn'
-require '../../../NNNetwork/module/spatial/Spatial_Weight_DBN_Row'
-require '../../../NNNetwork/module/spatial/cudnn_Spatial_Weight_DBN_Row'
-require '../../../NNNetwork/module/spatial/Spatial_Scaling'
+require '../../module/spatial/cudnn_Spatial_Weight_DBN_Row'
 
 
 local Convolution = cudnn.SpatialConvolution
@@ -76,12 +80,10 @@ local function createModel(opt)
       end
       s:add(Convolution(nInputPlane,n,3,3,stride,stride,1,1))
       --s:add(cudnn.Spatial_Weight_DBN_Row(nInputPlane,n,opt.m_perGroup,3,3,stride,stride,1,1))
-      --s:add(nn.Spatial_Scaling(n,1,false))
       s:add(SBatchNorm(n))
       s:add(ReLU(true))
       s:add(Convolution(n,n,3,3,1,1,1,1))
       --s:add(cudnn.Spatial_Weight_DBN_Row(n,n,opt.m_perGroup,3,3,1,1,1,1))
-      --s:add(nn.Spatial_Scaling(n,1,false))
 
       return block
          :add(nn.ConcatTable()
@@ -106,17 +108,14 @@ local function createModel(opt)
       end
       s:add(Convolution(nInputPlane,n,1,1,1,1,0,0))
      -- s:add(cudnn.Spatial_Weight_DBN_Row(nInputPlane,n,opt.m_perGroup,1,1,1,1,0,0))
-     -- s:add(nn.Spatial_Scaling(n,1,false))
       s:add(SBatchNorm(n))
       s:add(ReLU(true))
       s:add(Convolution(n,n,3,3,stride,stride,1,1))
       --s:add(cudnn.Spatial_Weight_DBN_Row(n,n,opt.m_perGroup,3,3,stride,stride,1,1))
-      --s:add(nn.Spatial_Scaling(n,1,false))
       s:add(SBatchNorm(n))
       s:add(ReLU(true))
       s:add(Convolution(n,n*4,1,1,1,1,0,0))
       --s:add(cudnn.Spatial_Weight_DBN_Row(n,n*4,opt.m_perGroup,1,1,1,1,0,0))
-      --s:add(nn.Spatial_Scaling(n*4,1,false))
 
       return block
          :add(nn.ConcatTable()
@@ -160,7 +159,6 @@ local function createModel(opt)
       -- The ResNet ImageNet model
      -- model:add(Convolution(3,64,7,7,2,2,3,3))
       model:add(cudnn.Spatial_Weight_DBN_Row(3,64,opt.m_perGroup,7,7,2,2,3,3))
-     -- model:add(nn.Spatial_Scaling(64,1,false))
       model:add(SBatchNorm(64))
       model:add(ReLU(true))
       model:add(Max(3,3,2,2,1,1))

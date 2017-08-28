@@ -1,5 +1,3 @@
--- Code for Wide Residual Networks http://arxiv.org/abs/1605.07146
--- (c) Sergey Zagoruyko, 2016
 require 'xlua'
 require 'optim'
 require 'image'
@@ -193,21 +191,6 @@ function debug_scale(name)
    end
 end
 
-function debug_recordScale()
-  local scales={}
-  for k,v in pairs(model:findModules('nn.SpatialBatchNormalization')) do
-   -- print('----------debug match--------') 
-    table.insert(scales, v.weight:float())
-  end
-   for k,v in pairs(model:findModules('nn.Spatial_Scaling')) do
-     table.insert(scales, v.weight:float())
-  end
-  for k,v in pairs(model:findModules('cudnn.SpatialBatchNormalization')) do
-     table.insert(scales, v.weight:float())
-  end
-
-  table.insert(scale_epoch, scales)
-end
 
 function train()
   model:training()
@@ -230,89 +213,7 @@ function train()
       local loss_Iter=f(inputs, targets)
       
       confusion:batchAdd(model.output, targets)
-     if opt.weight_debug>=1 and (iteration % opt.step_WD ==0 ) then
-         local Norm_gradP=torch.norm(gradParameters,1)/gradParameters:size(1)
-         local Norm_P=torch.norm(parameters,1)/gradParameters:size(1)
-         print(string.format("Iter: %6s,  N_GP=%3.12f, N_P=%3.12f, loss = %6.6f", iteration, Norm_gradP,Norm_P, loss_Iter))
-        if opt.weight_debug==2 then 
-          local Norm_input=torch.norm(inputs,1)/inputs:numel()
-          print('Norm_input:'..Norm_input)
-
-
-          local Norm_GP_table={}
-          local Norm_P_table={}
-          local Norm_GInput_table={}
-          local Norm_Output_table={} 
-         for k,v in pairs(model:findModules('nn.SpatialConvolution')) do
-          --for k,v in pairs(model:findModules('nn.SpatialMM_ForDebug')) do
-            table.insert(Norm_GP_table, torch.norm(v.gradWeight,1)/v.gradWeight:numel())
-            table.insert(Norm_P_table, torch.norm(v.weight,1)/v.weight:numel())
-            table.insert(Norm_GInput_table, torch.norm(v.gradInput,1)/v.gradInput:numel())
-            table.insert(Norm_Output_table, torch.norm(v.output,1)/v.output:numel()) 
-          end
-
-          for k,v in pairs(model:findModules('cudnn.SpatialConvolution')) do
-         -- print(v.weight:size())
-            table.insert(Norm_GP_table, torch.norm(v.gradWeight,1)/v.gradWeight:numel())
-            table.insert(Norm_P_table, torch.norm(v.weight,1)/v.weight:numel())
-            table.insert(Norm_GInput_table, torch.norm(v.gradInput,1)/v.gradInput:numel())
-            table.insert(Norm_Output_table, torch.norm(v.output,1)/v.output:numel())
-
-          end
-          for k,v in pairs(model:findModules('nn.Spatial_Weight_CenteredBN')) do
-         -- print(v.weight:size())
-            table.insert(Norm_GP_table, torch.norm(v.gradWeight,1)/v.gradWeight:numel())
-            table.insert(Norm_P_table, torch.norm(v.weight,1)/v.weight:numel())
-            table.insert(Norm_GInput_table, torch.norm(v.gradInput,1)/v.gradInput:numel())
-            table.insert(Norm_Output_table, torch.norm(v.output,1)/v.output:numel())
-         end
-          for k,v in pairs(model:findModules('nn.Spatial_Weight_BN')) do
-         -- print(v.weight:size())
-            table.insert(Norm_GP_table, torch.norm(v.gradWeight,1)/v.gradWeight:numel())
-            table.insert(Norm_P_table, torch.norm(v.weight,1)/v.weight:numel())
-            table.insert(Norm_GInput_table, torch.norm(v.gradInput,1)/v.gradInput:numel())
-            table.insert(Norm_Output_table, torch.norm(v.output,1)/v.output:numel())
-         end
-          for k,v in pairs(model:findModules('nn.Spatial_Weight_DBN_Row')) do
-         -- print(v.weight:size())
-            table.insert(Norm_GP_table, torch.norm(v.gradWeight,1)/v.gradWeight:numel())
-            table.insert(Norm_P_table, torch.norm(v.weight,1)/v.weight:numel())
-            table.insert(Norm_GInput_table, torch.norm(v.gradInput,1)/v.gradInput:numel())
-            table.insert(Norm_Output_table, torch.norm(v.output,1)/v.output:numel())
-         end
-          local Norm_GP_perModule=torch.FloatTensor(Norm_GP_table):reshape(1,table.getn(Norm_GP_table))
-          local Norm_P_perModule=torch.FloatTensor(Norm_P_table):reshape(1,table.getn(Norm_P_table))
-          local Norm_GInput_perModule=torch.FloatTensor(Norm_GInput_table):reshape(1,table.getn(Norm_GInput_table))
-          local Norm_Output_perModule=torch.FloatTensor(Norm_Output_table):reshape(1,table.getn(Norm_Output_table))
-               
-          table.insert(Norm_GradWeight, Norm_GP_perModule:clone())
-          table.insert(Norm_Weight, Norm_P_perModule:clone())
-          table.insert(Norm_GradInput, Norm_GInput_perModule:clone())
-          table.insert(Norm_Output, Norm_Output_perModule:clone())     
-         print('Norm_GradWeight_perModule')
-         print(Norm_GP_perModule)
-         print('Norm_Weight_perModule')
-         print(Norm_P_perModule)
-          print('Norm_GradInput_perModule')
-         print(Norm_GInput_perModule)
-          print('Norm_Output_perModule')
-          print(Norm_Output_perModule)
-        local Norm_scale_table={} 
-         for k,v in pairs(model:findModules('nn.Spatial_Scaling')) do
-         -- print(v.weight:size())
-            table.insert(Norm_scale_table, torch.norm(v.weight,1)/v.weight:numel())
-         end
-         local Norm_scale_perModule
-         if table.getn(Norm_scale_table)>0 then
-          Norm_scale_perModule=torch.FloatTensor(Norm_scale_table):reshape(1,table.getn(Norm_scale_table))
-         print('Norm_scale_perModule')
-         print(Norm_scale_perModule)
-         end
-
-       end         
-    else
        print(string.format("Iter: %6s,  loss = %6.6f", iteration,loss_Iter))            
-    end 
 
       losses[#losses+1]=loss_Iter
       loss = loss + loss_Iter
@@ -329,9 +230,6 @@ function train()
          end
       end
       
-    --  debug_scale('nn.SpatialBatchNormalization') 
-    --  debug_scale('nn.Spatial_Scaling') 
-    --  debug_scale('cudnn.SpatialBatchNormalization') 
 
       return f,gradParameters
     end, parameters, optimState)
@@ -440,21 +338,6 @@ for epoch=1,opt.max_epoch do
   --debug_recordScale()
 
 
-    for k,v in pairs(model:findModules('cudnn.Spatial_SVB')) do
-       v:updateWeight(0.5)
-    end
-
-    for k,v in pairs(model:findModules('cudnn.Spatial_SVD_Group')) do
-       -- print('updateWeight flag true')
-       v:updateWeight(true)
-    end
-    local  batch_inputs=provider.trainData.data[{{1,8},{},{},{}}] --use a small batch data to forward， and udpate weight
-    local  batch_outputs = model:forward(batch_inputs)
-
-    for k,v in pairs(model:findModules('cudnn.Spatial_SVD_Group')) do
-      --  print('updateWeight flag false')
-        v:updateWeight(false)
-    end
 
       if epoch % 2 ==0 then
         local k=torch.log(100)/(opt.max_epoch/2)
@@ -489,11 +372,6 @@ results.losses_epoch=losses_epoch
 results.train_times=train_times
 results.test_times=test_times
 results.timeCosts=timeCosts
---results.scale_epoch=scale_epoch
---results.Norm_GradWeight=Norm_GradWeight
---results.Norm_Weight=Norm_Weight
---results.Norm_GradInput=Norm_GradInput
---results.Norm_Output=Norm_Output
 
 torch.save('result_debug_'..baseString..'.dat',results)
 end

@@ -1,9 +1,14 @@
 -- Batch normalized googlenet
+--[[
+--  this model is originally from: https://github.com/soumith/imagenet-multiGPU.torch
+--    We replace the SpatialConvolution layer with our Orthogonal rectangular weight layer
+--]]
+
 
 require 'nn'
 require 'cunn'
 require 'cudnn'
-require '../../../NNNetwork/module/spatial/cudnn_Spatial_Weight_DBN_Row'
+require '../../module/spatial/cudnn_Spatial_Weight_DBN_Row'
 
 local function inception(opt,input_size, config)
    local concat = nn.Concat(2)

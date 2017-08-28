@@ -1,6 +1,5 @@
 -- Batch normalized googlenet
-require '../../../NNNetwork/module/spatial/Spatial_Scaling'
-require '../../../NNNetwork/module/spatial/cudnn_Spatial_Weight_DBN_Row'
+require '../../module/spatial/cudnn_Spatial_Weight_DBN_Row'
 
 
 local function inception(opt,input_size, config)
@@ -8,7 +7,6 @@ local function inception(opt,input_size, config)
    if config[1][1] ~= 0 then
       local conv1 = nn.Sequential()
       conv1:add(cudnn.Spatial_Weight_DBN_Row(input_size, config[1][1],opt.m_perGroup,1,1,1,1)):add(nn.ReLU(true))
-   --   conv1:add(nn.Spatial_Scaling(config[1][1],opt.BNScale,false))
 
       conv1:add(nn.SpatialBatchNormalization(config[1][1],1e-3))
       conv1:add(nn.ReLU(true))
@@ -17,26 +15,21 @@ local function inception(opt,input_size, config)
 
    local conv3 = nn.Sequential()
    conv3:add(cudnn.Spatial_Weight_DBN_Row(  input_size, config[2][1],opt.m_perGroup,1,1,1,1)):add(nn.ReLU(true))
-  -- conv3:add(nn.Spatial_Scaling(config[2][1],opt.BNScale,false))
    conv3:add(nn.SpatialBatchNormalization(config[2][1],1e-3))
    conv3:add(nn.ReLU(true))
    conv3:add(cudnn.Spatial_Weight_DBN_Row(config[2][1], config[2][2],opt.m_perGroup,3,3,1,1,1,1)):add(nn.ReLU(true))
-  -- conv3:add(nn.Spatial_Scaling(config[2][2],opt.BNScale,false))
    conv3:add(nn.SpatialBatchNormalization(config[2][2],1e-3))
    conv3:add(nn.ReLU(true))
    concat:add(conv3)
 
    local conv3xx = nn.Sequential()
    conv3xx:add(cudnn.Spatial_Weight_DBN_Row(  input_size, config[3][1],opt.m_perGroup,1,1,1,1)):add(nn.ReLU(true))
-  -- conv3xx:add(nn.Spatial_Scaling(config[3][1],opt.BNScale,false))
    conv3xx:add(nn.SpatialBatchNormalization(config[3][1],1e-3))
    conv3xx:add(nn.ReLU(true))
    conv3xx:add(cudnn.Spatial_Weight_DBN_Row(config[3][1], config[3][2],opt.m_perGroup,3,3,1,1,1,1)):add(nn.ReLU(true))
-   --conv3xx:add(nn.Spatial_Scaling(config[3][2],opt.BNScale,false))
    conv3xx:add(nn.SpatialBatchNormalization(config[3][2],1e-3))
    conv3xx:add(nn.ReLU(true))
    conv3xx:add(cudnn.Spatial_Weight_DBN_Row(config[3][2], config[3][2],opt.m_perGroup,3,3,1,1,1,1)):add(nn.ReLU(true))
-   --conv3xx:add(nn.Spatial_Scaling(config[3][2],opt.BNScale,false))
    conv3xx:add(nn.SpatialBatchNormalization(config[3][2],1e-3))
    conv3xx:add(nn.ReLU(true))
    concat:add(conv3xx)
@@ -52,7 +45,6 @@ local function inception(opt,input_size, config)
    end
    if config[4][2] ~= 0 then
       pool:add(cudnn.Spatial_Weight_DBN_Row(input_size, config[4][2],opt.m_perGroup,1,1,1,1)):add(nn.ReLU(true))
-    --  pool:add(nn.Spatial_Scaling(config[4][2],opt.BNScale,false))
       pool:add(nn.SpatialBatchNormalization(config[4][2],1e-3))
       pool:add(nn.ReLU(true))
    end
@@ -71,19 +63,15 @@ function createModel(opt)
 --   features:add(nn.SpatialBatchNormalization(64,1e-3))
 --   features:add(nn.ReLU(true))
    features:add(cudnn.Spatial_Weight_DBN_Row(3,64,opt.m_perGroup,3,3,1,1,0,0))
-  -- features:add(nn.Spatial_Scaling(64,opt.BNScale,false))
    features:add(nn.SpatialBatchNormalization(64,1e-3))
    features:add(nn.ReLU(true))
    features:add(cudnn.Spatial_Weight_DBN_Row(64,192,opt.m_perGroup,3,3,1,1,0,0))
-  -- features:add(nn.Spatial_Scaling(192,opt.BNScale,false))
    features:add(nn.SpatialBatchNormalization(192,1e-3))
    features:add(nn.ReLU(true))
---   features:add(nn.SpatialMaxPooling(3,3,2,2):ceil())
    features:add(inception(opt, 192, {{ 64},{ 64, 64},{ 64, 96},{'avg', 32}})) -- 3(a)
    features:add(inception(opt, 256, {{ 64},{ 64, 96},{ 64, 96},{'avg', 64}})) -- 3(b)
    features:add(inception(opt, 320, {{  0},{128,160},{ 64, 96},{'max',  0}})) -- 3(c)
    features:add(cudnn.Spatial_Weight_DBN_Row(576,576,opt.m_perGroup,2,2,2,2))
-   --features:add(nn.Spatial_Scaling(576,opt.BNScale,false))
    features:add(nn.SpatialBatchNormalization(576,1e-3))
    features:add(nn.ReLU(true))
    features:add(inception(opt, 576, {{224},{ 64, 96},{ 96,128},{'avg',128}})) -- 4(a)

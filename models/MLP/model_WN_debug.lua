@@ -1,7 +1,5 @@
---require 'module/Linear_ForDebug'
 
 
---require 'module/BatchLinear_FIM'
 require 'module/Linear_Weight_QR'
 require 'module/Linear_Weight_ST'
 require 'module/Linear_Weight_ST_CN'
@@ -40,7 +38,6 @@ function create_model(opt)
   end 
   
   local linear=nn.Linear
---  local module_BN=nn.BatchLinear_FIM
   local module_Projection_ZCA=nn.Linear_Weight_Projection_ZCA
   local module_PD_ZCA=nn.Linear_Weight_PD_ZCA
   local module_PD_PCA=nn.Linear_Weight_PD_PCA
@@ -89,7 +86,6 @@ function create_model(opt)
       local s=nn.Sequential()
        s:add(nonlinear())
        s:add(nn.Linear_Weight_PCA_Row(n_input, n_output,opt.orth_intial))
-       -- s:add(module_affine(n_output,1,true))
        return s
    end
 
@@ -98,7 +94,6 @@ function create_model(opt)
     local s=nn.Sequential()
     s:add(nonlinear())
     s:add(nn.Linear_Weight_DBN_Row_Group(n_input, n_output,opt.m_perGroup_WDBN))
-   -- s:add(module_affine(n_output,1,true))
 
     return s
   end 
@@ -171,7 +166,6 @@ function create_model(opt)
      end
 elseif opt.model=='WPCA_Row' then
    model:add(nn.Linear_Weight_PCA_Row(opt.n_inputs,cfg_hidden[1],opt.orth_intial))
- -- model:add(module_affine(cfg_hidden[1],1,true))
    for i=1,n do
     if i==n then
       --model:add(block_WPCA_Row(cfg_hidden[i],opt.n_outputs))
@@ -186,7 +180,6 @@ elseif opt.model=='WPCA_Row' then
     elseif opt.model=='WDBN_Row' then   
 
      model:add(nn.Linear_Weight_DBN_Row_Group(opt.n_inputs,cfg_hidden[1],opt.m_perGroup_WDBN))
-   --  model:add(module_affine(cfg_hidden[1],1,true))
      for i=1,n do
        if i==n then
          --model:add(block_WDBN_Row(cfg_hidden[i],opt.n_outputs)) 

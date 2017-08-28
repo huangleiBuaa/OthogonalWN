@@ -1,8 +1,8 @@
 require 'nn'
 require 'cunn'
 
- require '../../../NNNetwork/module/spatial/Spatial_Scaling'
- require '../../../NNNetwork/module/spatial/cudnn_Spatial_Weight_DBN_Row'
+ require '../../module/spatial/Spatial_Scaling'
+ require '../../module/spatial/cudnn_Spatial_Weight_DBN_Row'
 
 local backend_name = 'cudnn'
 
@@ -33,7 +33,6 @@ end
 local MaxPooling = backend.SpatialMaxPooling
 local n=opt.hidden_number
 ConvBNReLU(3,n)
---vgg:add(MaxPooling(2,2,2,2))
 
 ConvBNReLU(n,n*2)
 vgg:add(MaxPooling(2,2,2,2))
@@ -46,12 +45,6 @@ ConvBNReLU(n*4,n*8,true)
 ConvBNReLU(n*8,n*8,true)
 vgg:add(nn.SpatialAveragePooling(8,8,1,1))
 
--- In the last block of convolutions the inputs are smaller than
--- the kernels and cudnn doesn't handle that, have to use cunn
---backend = nn
---ConvBNReLU(n*8,n*8)
---ConvBNReLU(n*8,n*8)
---vgg:add(MaxPooling(2,2,2,2))
 vgg:add(nn.View(n*8))
 
 classifier = nn.Sequential()
@@ -79,8 +72,5 @@ end
 
 MSRinit(vgg)
 
--- check that we can propagate forward without errors
--- should get 16x10 tensor
---print(#vgg:cuda():forward(torch.CudaTensor(16,3,32,32)))
 
 return vgg

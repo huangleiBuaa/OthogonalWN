@@ -1,7 +1,13 @@
+--[[
+ this model is originally from: https://github.com/soumith/imagenet-multiGPU.torch
+ We replace the SpatialConvolution layer with our Orthogonal rectangular weight layer
+ ]]--
+
+
 require 'nn'
 require 'cunn'
 require 'cudnn'
-require '../../../NNNetwork/module/spatial/cudnn_Spatial_Weight_DBN_Row'
+require '../../module/spatial/cudnn_Spatial_Weight_DBN_Row'
 
 function createModel(opt)
    -- from https://code.google.com/p/cuda-convnet2/source/browse/layers/layers-imagenet-1gpu.cfg

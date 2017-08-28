@@ -27,11 +27,7 @@ function Linear_Weight_DBN_Row_Group:__init(inputSize,outputSize,m_perGroup,unit
      self.m_perGroup =  inputSize
    end 
   self:reset() 
-
-
 end
-
-
 
 function Linear_Weight_DBN_Row_Group:reset(stdv)
    if stdv then
@@ -39,13 +35,9 @@ function Linear_Weight_DBN_Row_Group:reset(stdv)
    else
       stdv = 1./math.sqrt(self.weight:size(2))
    end
-
-
       self.weight:uniform(-stdv, stdv)
         --    self.weight:randn(self.weight:size(1),self.weight:size(2))
      -- self.bias:uniform(-stdv, stdv)
- 
-     
    return self
 end
 
@@ -103,13 +95,11 @@ function Linear_Weight_DBN_Row_Group:updateOutput(input)
            -----------------------matrix decomposition------------- 
     
       local rotation,eig,_=torch.svd(self.buffer_1) --reuse the buffer: 'buffer' record e, 'buffer_2' record V    
-   
 
       
       if self.debug then
           print(eig)
       end 
-     
       
       scale:resizeAs(eig)     
       scale:copy(eig)
@@ -192,7 +182,6 @@ function Linear_Weight_DBN_Row_Group:updateGradInput(input, gradOutput)
          self.gradInput:zero()
       end
       
-      
      if input:dim() == 2 then
          
          self.gradInput:addmm(0, 1, gradOutput, self.W)    
@@ -200,7 +189,6 @@ function Linear_Weight_DBN_Row_Group:updateGradInput(input, gradOutput)
      else
       error('input must be vector or matrix')
      end
-  
       
       return self.gradInput
    end
@@ -331,7 +319,6 @@ function updateAccGradParameters_perGroup(gradW_perGroup, groupId)
 
 end
 
--- we do not need to accumulate parameters when sharing
 Linear_Weight_DBN_Row_Group.sharedAccUpdateGradParameters = Linear_Weight_DBN_Row_Group.accUpdateGradParameters
 
 

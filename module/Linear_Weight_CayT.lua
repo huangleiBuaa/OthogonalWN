@@ -141,9 +141,6 @@ function Linear_Weight_CayT:updateOutput(input)
    else
       error('input must be vector or matrix')
    end
-
-   
-
    
    return self.output
 end
@@ -224,16 +221,11 @@ function Linear_Weight_CayT:accGradParameters(input, gradOutput, scale)
       end
    end
    
-  
-   
-   
-   
    self.count=self.count+1 --the ending of all the operation in this module
 end
 
 -- we do not need to accumulate parameters when sharing
 Linear_Weight_CayT.sharedAccUpdateGradParameters = Linear_Weight_CayT.accUpdateGradParameters
-
 
 function Linear_Weight_CayT:__tostring__()
   return torch.type(self) ..

@@ -1,4 +1,8 @@
 -- Batch normalized googlenet
+--[[
+--  this model is originally from: https://github.com/soumith/imagenet-multiGPU.torch
+--]]
+
 
 require 'nn'
 require 'cunn'

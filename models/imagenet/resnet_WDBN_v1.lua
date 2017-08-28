@@ -9,11 +9,18 @@
 --  The ResNet model definition
 --
 
+--[[
+--  this model is originally from: https://github.com/facebook/fb.resnet.torch
+--    We replace the SpatialConvolution layer with our Orthogonal rectangular weight layer
+--]]
+
+
+
 local nn = require 'nn'
 require 'cunn'
 require 'cudnn'
 
-require '../../../NNNetwork/module/spatial/cudnn_Spatial_Weight_DBN_Row'
+require '../../module/spatial/cudnn_Spatial_Weight_DBN_Row'
 
 local Convolution = cudnn.SpatialConvolution
 local Avg = cudnn.SpatialAveragePooling

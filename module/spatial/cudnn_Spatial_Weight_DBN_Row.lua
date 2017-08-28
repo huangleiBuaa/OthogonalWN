@@ -1,3 +1,4 @@
+
 local Spatial_Weight_DBN_Row, parent =
     torch.class('cudnn.Spatial_Weight_DBN_Row', 'nn.SpatialConvolution')
 local ffi = require 'ffi'

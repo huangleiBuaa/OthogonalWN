@@ -1,17 +1,3 @@
--------------------------------------------------------------------------------------------------------
---experiment 8: a comprehensive comparision between the method, consider the:
---evaluation: (1)Train_loss;(2)validate_accuracy, per epoch;(3)Test accuracy per epoch
---my methods: compared method include: 
--- Plain,   NNN ,  BN,    BN_bnb,    DBN_16,    DBN_32,    DBN_64,    
---DBN_128,    DBN_dnd_16,     DBN_dnd_32,     DBN_dnd_64,    
---  DBN_dnd_128,DBN_PCA_16, DBN_PCA_32, DBN_PCA_64, DBN_PCA_128 
---options:
---(1)the input can be whitened or not; 
---(2) the weight can be unified of  initialized orthogonal .
---(3)the optim method: simple, rms, adagrad
---(4)the learning rate, weight decay, momentom
---(5)nonlinear module: Relu
---
 -------------------------------------------------------------------------------------------------
 require 'xlua'
 require 'torch'
@@ -54,14 +40,12 @@ cmd:option('-learningRate',1,'learning rate')
 cmd:option('-weightDecay',0,'weight Decay for regularization')
 cmd:option('-momentum',0,'momentum')
 
--------------for DBN and DBN_var method----------------
 cmd:option('-m_perGroup',256,'the number of per group')
 cmd:option('-m_perGroup_WDBN',256,'the number of per group')
 cmd:option('-topK',64,'for DBN_PK method, scale the topK eigenValue')
 cmd:option('-eig_epsilo',1e-2,'for DBN_PEP method, scale the eigenValue larger eig_epsilo')
 
 cmd:option('-optimization','simple','the methods: options:adam,simple,rms,adagrad,lbfgs')
----------------for nnn BatchLinear_NoBP realted method----------------
 cmd:option('-T',100,'the interval to update the coefficient')
 cmd:option('-epcilo',1e-3,'the revision term for natural neural network')
 cmd:option('-unitLength_flag',true,'for the Weight_BN_* methods')
@@ -158,8 +142,6 @@ mnist.download()
     return data
 end
 
- --trainData = torch.load('/home/huanglei/torch_work/dataset/MNIST/MNIST_train.dat')
- --testData = torch.load('/home/huanglei/torch_work/dataset/MNIST/MNIST_test.dat')
 
    trainData = load_dataset('train', opt.train_size)
    testData = load_dataset('test', opt.test_size)
@@ -287,121 +269,7 @@ print(model)
 
    optimMethod (feval, parameters, opt.optimState)
    
-      if ((string.match(opt.model,'nnn'))  and iteration % opt.T ==0) then
-    ------------------start:update the proMatrix of NNN-------------------------------
-        local index = torch.randperm(trainData.data:size(1))[{{1, opt.Ns}}]:long()
-        
-        local  batch_inputs=trainData.data:index(1,index)
-        local  batch_targets = trainData.labels:index(1,index)
-        local  batch_outputs = model:forward(batch_inputs)
-    
 
-        --model:updateNormLinearParameter(batch_inputs, dloss_doutput, scale,  opt.Ns, opt.epcilo)
-        for k,v in pairs(model:findModules('nn.NormLinear_new')) do
-          print('update nnn projection:')
-          v:updatePromatrix(opt.epcilo)
-        end
-     end
-    ------------------end:update the proMatrix of NNN-------------------------------
- 
-
-
-      if ((string.match(opt.model,'SVB'))  and iteration % opt.T ==0) then
-    ------------------start:update the weightMatrix of SVB-------------------------------
-        for k,v in pairs(model:findModules('nn.Linear_SVB')) do
-          print('update weight by SVB:')
-          v:updateWeight(0.5)
-        end
-     end
-
-      if ((string.match(opt.model,'SVD'))  and iteration % opt.T ==0) then
-    ------------------start:update the weightMatrix of SVB-------------------------------
-        for k,v in pairs(model:findModules('nn.Linear_SVD_Group')) do
-          --print('update weight by SVD:')
-          v:updateWeight(0)
-        end
-     end
-
-----------------------------------debug norm scale --------------------
-
-     if opt.weight_debug>=1 and (iteration % opt.step_WD ==0 ) then
-         local Norm_gradP=torch.norm(gradParameters,1)/gradParameters:size(1)
-         local Norm_P=torch.norm(parameters,1)/gradParameters:size(1)
-        if opt.weight_debug==2 then
-
-            local Norm_input=torch.norm(inputs,1)/inputs:numel()
-          print('Norm_input:'..Norm_input)
-
-
-
-          local Norm_GP_table={}
-          local Norm_P_table={}
-          local Norm_GInput_table={}
-          local Norm_Output_table={}
-         for k,v in pairs(model:findModules('nn.Linear_ForDebug')) do
-       --     print('match') 
-            table.insert(Norm_GP_table, torch.norm(v.gradWeight,1)/v.gradWeight:numel())
-            table.insert(Norm_P_table, torch.norm(v.weight,1)/v.weight:numel())
-            table.insert(Norm_GInput_table, torch.norm(v.gradInput,1)/v.gradInput:numel())
-            table.insert(Norm_Output_table, torch.norm(v.output,1)/v.output:numel())
-          end
-       
-         for k,v in pairs(model:findModules('nn.Linear_Weight_BN_Row')) do
-       --     print('match') 
-            table.insert(Norm_GP_table, torch.norm(v.gradWeight,1)/v.gradWeight:numel())
-            table.insert(Norm_P_table, torch.norm(v.weight,1)/v.weight:numel())
-            table.insert(Norm_GInput_table, torch.norm(v.gradInput,1)/v.gradInput:numel())
-            table.insert(Norm_Output_table, torch.norm(v.output,1)/v.output:numel())
-          end
-         for k,v in pairs(model:findModules('nn.Linear_Weight_DBN_Row_Group')) do
-       --     print('match') 
-            table.insert(Norm_GP_table, torch.norm(v.gradWeight,1)/v.gradWeight:numel())
-            table.insert(Norm_P_table, torch.norm(v.weight,1)/v.weight:numel())
-            table.insert(Norm_GInput_table, torch.norm(v.gradInput,1)/v.gradInput:numel())
-            table.insert(Norm_Output_table, torch.norm(v.output,1)/v.output:numel())
-          end
-         for k,v in pairs(model:findModules('nn.Linear_Weight_PCA_Row')) do
-       --     print('match') 
-            table.insert(Norm_GP_table, torch.norm(v.gradWeight,1)/v.gradWeight:numel())
-            table.insert(Norm_P_table, torch.norm(v.weight,1)/v.weight:numel())
-            table.insert(Norm_GInput_table, torch.norm(v.gradInput,1)/v.gradInput:numel())
-            table.insert(Norm_Output_table, torch.norm(v.output,1)/v.output:numel())
-          end
-
-         local Norm_GP_perModule=torch.FloatTensor(Norm_GP_table):reshape(1,table.getn(Norm_GP_table))
-          local Norm_P_perModule=torch.FloatTensor(Norm_P_table):reshape(1,table.getn(Norm_P_table))
-          local Norm_GInput_perModule=torch.FloatTensor(Norm_GInput_table):reshape(1,table.getn(Norm_GInput_table))
-          local Norm_Output_perModule=torch.FloatTensor(Norm_Output_table):reshape(1,table.getn(Norm_Output_table))
-
-          table.insert(Norm_GradWeight, Norm_GP_perModule:clone())
-          table.insert(Norm_Weight, Norm_P_perModule:clone())
-          table.insert(Norm_GradInput, Norm_GInput_perModule:clone())
-          table.insert(Norm_Output, Norm_Output_perModule:clone())
-         print('Norm_GradWeight_perModule')
-         print(Norm_GP_perModule)
-         print('Norm_Weight_perModule')
-         print(Norm_P_perModule)
-          print('Norm_GradInput_perModule')
-         print(Norm_GInput_perModule)
-          print('Norm_Output_perModule')
-          print(Norm_Output_perModule)
-
-        local Norm_scale_table={}
-         for k,v in pairs(model:findModules('nn.Affine_module')) do
-         -- print(v.weight:size())
-            table.insert(Norm_scale_table, torch.norm(v.weight,1)/v.weight:numel())
-         end
-         local Norm_scale_perModule
-         if table.getn(Norm_scale_table)>0 then
-          Norm_scale_perModule=torch.FloatTensor(Norm_scale_table):reshape(1,table.getn(Norm_scale_table))
-         print('Norm_scale_perModule')
-         print(Norm_scale_perModule)
-         end
-      end
-    else
-      -- print(string.format("Iter: %6s,  loss = %6.6f", iteration,f))
-    end
---------------------------------end  debug ----------------------------------------------------- 
    
   end
 
@@ -457,10 +325,6 @@ train_accus={}
 test_accus={}
 start_time=torch.tic()
 
-Norm_GradWeight={}
-Norm_Weight={}
-Norm_GradInput={}
-Norm_Output={}
 
 for i=1,opt.max_epoch do
 --  train()
@@ -486,9 +350,6 @@ results.opt=opt
 results.losses=losses
 results.train_accus=train_accus
 results.test_accus=test_accus
---results.timeCosts=timeCosts
---results.testLogger=testLogger
---results.confusion=confusion
 results.train_times=train_times
 results.test_times=test_times
 

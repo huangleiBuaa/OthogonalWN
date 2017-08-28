@@ -1,6 +1,3 @@
---[[
-
-]]--
 local Affine_module,parent = torch.class('nn.Affine_module', 'nn.Module')
 
 function Affine_module:__init(nFeature,initial, withBias)

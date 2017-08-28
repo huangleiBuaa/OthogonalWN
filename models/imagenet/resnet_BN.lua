@@ -9,6 +9,10 @@
 --  The ResNet model definition
 --
 
+--[[
+--  this model is originally from: https://github.com/facebook/fb.resnet.torch
+--]]
+
 local nn = require 'nn'
 require 'cunn'
 

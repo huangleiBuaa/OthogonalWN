@@ -238,8 +238,6 @@ function Linear_Weight_ST:accGradParameters(input, gradOutput, scale)
       end
    end
    
-  
-   
    
    
    self.count=self.count+1 --the ending of all the operation in this module

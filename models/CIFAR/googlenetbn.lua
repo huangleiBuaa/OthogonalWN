@@ -1,4 +1,9 @@
 -- Batch normalized googlenet
+--[[
+--  this model is originally from: https://github.com/soumith/imagenet-multiGPU.torch, for imageNet dataset
+-- We do necessary process of the first layers tailored for the 32x32 input of Cifar 
+--]]
+
 local function inception(input_size, config)
    local concat = nn.Concat(2)
    if config[1][1] ~= 0 then
