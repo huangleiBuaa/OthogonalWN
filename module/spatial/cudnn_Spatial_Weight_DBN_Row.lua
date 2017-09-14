@@ -1,3 +1,14 @@
+--[[
+ --This file implements orthognoal linear module, which wraps orthogonal weight normalization
+  --into the SpationConvolution of cudnn.
+    --
+  --The code is based on the orignial Torch implemantation of SpationConvolution for cudnn.
+ -- -------------------------------------------------------------------
+    --Author: Lei Huang
+    --mail: huanglei@nlsde.buaa.edu.cn
+]]--
+
+
 local Spatial_Weight_DBN_Row, parent =
     torch.class('cudnn.Spatial_Weight_DBN_Row', 'nn.SpatialConvolution')
 local ffi = require 'ffi'
