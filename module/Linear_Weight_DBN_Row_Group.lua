@@ -7,8 +7,6 @@ function Linear_Weight_DBN_Row_Group:__init(inputSize,outputSize,m_perGroup,unit
   -- self.bias = torch.Tensor(outputSize)
    self.gradWeight = torch.Tensor(outputSize, inputSize)
   -- self.gradBias = torch.Tensor(outputSize)
-     ----if use unitLength, means the F_norm(W_i)=1 (like WeightNormalization style),
-      -- if not, means the var(W_i)=1(like batchNormalization), The difference is 1/n
    
   if unitLength_flag ~= nil then
       assert(type(unitLength_flag) == 'boolean', 'unitLength_flag has to be true/false')
@@ -16,7 +14,6 @@ function Linear_Weight_DBN_Row_Group:__init(inputSize,outputSize,m_perGroup,unit
    else
       self.unitLength_flag = true
    end 
-
   self.eps=1e-7
   self.threshold=0
   self.debug=false
@@ -27,7 +24,11 @@ function Linear_Weight_DBN_Row_Group:__init(inputSize,outputSize,m_perGroup,unit
      self.m_perGroup =  inputSize
    end 
   self:reset() 
+
+
 end
+
+
 
 function Linear_Weight_DBN_Row_Group:reset(stdv)
    if stdv then
@@ -35,9 +36,11 @@ function Linear_Weight_DBN_Row_Group:reset(stdv)
    else
       stdv = 1./math.sqrt(self.weight:size(2))
    end
-      self.weight:uniform(-stdv, stdv)
-        --    self.weight:randn(self.weight:size(1),self.weight:size(2))
-     -- self.bias:uniform(-stdv, stdv)
+   self.weight:uniform(-stdv, stdv)
+   -- self.weight:randn(self.weight:size(1),self.weight:size(2))
+   -- self.bias:uniform(-stdv, stdv)
+ 
+     
    return self
 end
 
@@ -73,7 +76,7 @@ function Linear_Weight_DBN_Row_Group:updateOutput(input)
       
       local n_output=weight_perGroup:size(1)
       local n_input=weight_perGroup:size(2)
-     local scale=weight_perGroup.new()
+      local scale=weight_perGroup.new()
       
 
       local centered = weight_perGroup.new()
@@ -82,37 +85,34 @@ function Linear_Weight_DBN_Row_Group:updateOutput(input)
       self.W_perGroup:resizeAs(weight_perGroup)
 
       self.buffer:mean(weight_perGroup, 2) 
-      
-     -- self.buffer:fill(0)  --for test, use no centered DBN
-      self.buffer_2:repeatTensor(self.buffer, 1, n_input)   
-      centered:add(weight_perGroup, -1, self.buffer_2)
-      
-       ----------------------calcualte the projection matrix----------------------
+      centered:add(weight_perGroup, -1, self.buffer:expandAs(weight_perGroup))
+
+     ----------------------calcualte the projection matrix----------------------
       self.buffer_1:resize(weight_perGroup:size(1),weight_perGroup:size(1))
       
       self.buffer_1:addmm(0,self.buffer_1,1/n_input,centered,centered:t()) --buffer_1 record correlation matrix
-        self.buffer_1:add(self.eps,torch.eye(self.buffer_1:size(1)))
-           -----------------------matrix decomposition------------- 
-    
-      local rotation,eig,_=torch.svd(self.buffer_1) --reuse the buffer: 'buffer' record e, 'buffer_2' record V    
+      self.buffer_1:add(self.eps,torch.eye(self.buffer_1:size(1)))
 
+     -----------------------matrix decomposition------------- 
+    
+      local rotation,eig,_=torch.svd(self.buffer_1) 
+   
       
       if self.debug then
           print(eig)
       end 
-      
+     
       scale:resizeAs(eig)     
       scale:copy(eig)
       scale:pow(-1/2) --scale=eig^(-1/2)
       self.buffer_1:diag(scale)   --self.buffer_1 cache the scale matrix  
       self.buffer_2:resizeAs(rotation) 
       self.buffer_2:mm(self.buffer_1,rotation:t()) --U= Eighta^(-1/2)*D^T
+      
       self.buffer_1:mm(rotation,self.buffer_2)     
      
       self.W_perGroup:mm(self.buffer_1,centered)
            
-      
-      
       
       if self.unitLength_flag then 
         self.W_perGroup:mul(math.sqrt(1/n_input))
@@ -127,13 +127,10 @@ function Linear_Weight_DBN_Row_Group:updateOutput(input)
       return self.W_perGroup
   end      
     
- 
-    
-    
       
 --------------------------------update main function---------------------- 
 
-  local nframe = input:size(1)
+   local nframe = input:size(1)
    local nElement = self.output:nElement()
    local n_output=self.weight:size(1)
    local n_input=self.weight:size(2)  
@@ -144,7 +141,7 @@ function Linear_Weight_DBN_Row_Group:updateOutput(input)
    
    self.W=self.W or input.new()
    self.W:resizeAs(self.weight)  
-     -- buffers that are reused
+   
    self.buffer = self.buffer or input.new()
    self.buffer_1 = self.buffer_1 or input.new()
    self.buffer_2 = self.buffer_2 or input.new()   
@@ -163,12 +160,12 @@ function Linear_Weight_DBN_Row_Group:updateOutput(input)
          self.W[{{start_index,end_index},{}}]=updateOutput_perGroup(self.weight[{{start_index,end_index},{}}],i)   
       end    
       
-   if input:dim() == 2 then
+    if input:dim() == 2 then
       self.output:addmm(0, self.output, 1, input, self.W:t())
-     -- self.output:addr(1, self.addBuffer, self.bias)
-   else
+     -- self.output:addr(1, self.addBuffer, self.bias) --for cudnn, the bias is usually omited for efficiency
+    else
       error('input must be vector or matrix')
-   end
+    end
    
    return self.output
 end
@@ -183,12 +180,11 @@ function Linear_Weight_DBN_Row_Group:updateGradInput(input, gradOutput)
       end
       
      if input:dim() == 2 then
-         
          self.gradInput:addmm(0, 1, gradOutput, self.W)    
-         
      else
       error('input must be vector or matrix')
      end
+  
       
       return self.gradInput
    end
@@ -197,20 +193,6 @@ end
 function Linear_Weight_DBN_Row_Group:accGradParameters(input, gradOutput, scale)
  
  ------------------calculate the K matrix---------------------
-  function getK(scale)
-    local K=torch.Tensor(scale:size(1),scale:size(1)):fill(0)
-    local revise=0    --1e-100
-    for i=1,scale:size(1) do
-      for j=1,scale:size(1) do
-        if (i~=j) and torch.abs(scale[i]-scale[j])> self.threshold then
-          K[i][j]=1/(scale[i]-scale[j]+revise)
-        end
-      
-      end   
-    end  
-  
-    return K  
-  end
 
   function getK_new(eig)
 
@@ -253,6 +235,7 @@ function updateAccGradParameters_perGroup(gradW_perGroup, groupId)
      
      self.buffer:diag(scale)
      self.U:mm( self.buffer,rotation:t())
+     
      self.hat_x:mm( self.U,centered)
      self.d_hat_x:mm(rotation:t(),gradW_perGroup)  
         
@@ -260,21 +243,18 @@ function updateAccGradParameters_perGroup(gradW_perGroup, groupId)
      self.f:mean(self.d_hat_x, 2)
      
 
-       local sz = (#self.FC)[1]    
+     local sz = (#self.FC)[1]    
      local temp_diag=torch.diag(self.FC) --get the diag element of d_EighTa
-    self.M:diag(temp_diag) --matrix form
+     self.M:diag(temp_diag) --matrix form
  --------------------------------calculate S-----------------------------    
-   --  self.buffer:diag(self.eig)
-    -- self.S:mm(self.buffer, self.FC:t())
-     self.S:cmul(self.FC:t(), torch.repeatTensor(eig, sz, 1):t()) 
-     self.buffer:resizeAs(eig):copy(eig):pow(1/2)   
-     self.buffer_1:cmul(self.FC, torch.repeatTensor(self.buffer, sz, 1):t())
-     self.buffer_2:cmul(self.buffer_1, torch.repeatTensor(self.buffer, sz, 1))     
-     self.S:add(self.buffer_2)
-     
-     self.buffer=getK_new(eig)
-     
-
+    
+    self.S:cmul(self.FC:t(), eig:view(sz, 1):expandAs(self.FC))
+    self.buffer:resizeAs(eig):copy(eig):pow(1/2)
+    self.buffer_1:cmul(self.FC, self.buffer:view(sz, 1):expandAs(self.FC))
+    self.buffer_2:cmul(self.buffer_1, self.buffer:view(1, sz):expandAs(self.buffer_1))
+    
+    self.S:add(self.buffer_2)
+    self.buffer=getK_new(eig)
      
      self.S:cmul(self.buffer:t())
      self.buffer:copy(self.S)
@@ -284,13 +264,9 @@ function updateAccGradParameters_perGroup(gradW_perGroup, groupId)
      self.buffer_1:resizeAs(self.d_hat_x)
      self.buffer_1:mm( self.S:t(),self.hat_x) --(S-M)*self.hat_x
      
-     self.buffer:repeatTensor(self.f, 1, n_input)
-     self.buffer_1:add(self.d_hat_x):add(-1, self.buffer)
-   
+     self.buffer_1:add(self.d_hat_x):add(-1, self.f:expandAs(self.d_hat_x))
     
-   -- self.S:resizeAs(self.buffer_1):mm(self.buffer_1, self.M:diag(scale)) -- for debug
     self.gradWeight_perGroup:mm( self.U:t(),self.buffer_1)   
- 
        
       if self.unitLength_flag then 
         self.gradWeight_perGroup:mul(math.sqrt(1/n_input))
@@ -319,6 +295,7 @@ function updateAccGradParameters_perGroup(gradW_perGroup, groupId)
 
 end
 
+-- we do not need to accumulate parameters when sharing
 Linear_Weight_DBN_Row_Group.sharedAccUpdateGradParameters = Linear_Weight_DBN_Row_Group.accUpdateGradParameters
 
 

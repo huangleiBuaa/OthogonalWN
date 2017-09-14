@@ -113,7 +113,7 @@ function create_model(opt)
 
 -----------------------------------------model configure-------------------
 
-  if opt.model=='sgd' then 
+  if opt.model=='plain' then 
        model:add(linear(opt.n_inputs,cfg_hidden[1],opt.orth_intial))
     for i=1,n do
        if i==n then
@@ -134,7 +134,7 @@ function create_model(opt)
          model:add(block_QR(cfg_hidden[i],cfg_hidden[i+1]))
        end
      end
-  elseif opt.model=='ST' then
+  elseif opt.model=='EI_QR' then
    model:add(nn.Linear_Weight_ST(opt.n_inputs,cfg_hidden[1],opt.learningRate))
      for i=1,n do
        if i==n then
@@ -144,7 +144,7 @@ function create_model(opt)
          model:add(block_ST(cfg_hidden[i],cfg_hidden[i+1]))
        end
      end
-  elseif opt.model=='ST_CN' then
+  elseif opt.model=='CI_QR' then
    model:add(nn.Linear_Weight_ST_CN(opt.n_inputs,cfg_hidden[1],opt.learningRate))
      for i=1,n do
        if i==n then
@@ -164,7 +164,7 @@ function create_model(opt)
          model:add(block_ST(cfg_hidden[i],cfg_hidden[i+1]))
        end
      end
-elseif opt.model=='WPCA_Row' then
+elseif opt.model=='OLM_var' then
    model:add(nn.Linear_Weight_PCA_Row(opt.n_inputs,cfg_hidden[1],opt.orth_intial))
    for i=1,n do
     if i==n then
@@ -177,7 +177,7 @@ elseif opt.model=='WPCA_Row' then
 
   
    
-    elseif opt.model=='WDBN_Row' then   
+    elseif opt.model=='OLM' then   
 
      model:add(nn.Linear_Weight_DBN_Row_Group(opt.n_inputs,cfg_hidden[1],opt.m_perGroup_WDBN))
      for i=1,n do

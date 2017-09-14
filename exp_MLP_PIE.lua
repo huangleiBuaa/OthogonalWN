@@ -27,9 +27,9 @@ cmd:text('compare the Decorelated BatchNormalizaiton method with baselines on ML
 cmd:text()
 cmd:text('Options')
 
-cmd:option('-model','sgd','the methods: options:WNorm, WBN_Row,WCBN_Row,WGC,WO_Row,WO_Row_batch,WOBN_Row')
+cmd:option('-model','OLM_scale','the methods: options:WNorm, WBN_Row,WCBN_Row,WGC,WO_Row,WO_Row_batch,WOBN_Row')
 cmd:option('-mode_nonlinear',2,'nonlinear module: 1 indicates tanh, 0 indicates sigmoid, 2 indecates Relu')
-cmd:option('-max_epoch',100,'maximum number of iterations')
+cmd:option('-max_epoch',80,'maximum number of iterations')
 cmd:option('-n_hidden_number',128,'the dimension of the hidden laysers')
 cmd:option('-save',"log_MLP_WDBN_PIE" ,'subdirectory to save logs')
 cmd:option('-inputScaled',true,'whether preoprocess the input, scale to (0,1)')
@@ -40,8 +40,8 @@ cmd:option('-learningRate',1,'learning rate')
 cmd:option('-weightDecay',0,'weight Decay for regularization')
 cmd:option('-momentum',0,'momentum')
 
-cmd:option('-m_perGroup',32,'the number of per group')
-cmd:option('-m_perGroup_WDBN',128,'the number of per group')
+cmd:option('-m_perGroup',64,'the number of per group')
+cmd:option('-m_perGroup_WDBN',64,'the number of per group')
 cmd:option('-topK',64,'for DBN_PK method, scale the topK eigenValue')
 cmd:option('-eig_epsilo',1e-2,'for DBN_PEP method, scale the eigenValue larger eig_epsilo')
 
@@ -230,7 +230,7 @@ print(model)
 
  -- local tic = torch.tic()
   for t,v in ipairs(indices) do
-    xlua.progress(t, #indices)
+--    xlua.progress(t, #indices)
 
     local inputs = trainData.data:index(1,v)
     targets:copy(trainData.labels:index(1,v))

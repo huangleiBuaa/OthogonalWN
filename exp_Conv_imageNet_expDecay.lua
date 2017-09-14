@@ -77,30 +77,6 @@ for epoch = startEpoch, opt.nEpochs do
    end
 
 
-    if string.match(opt.model,'SVD')  then
-        print('--update the SVD----------')
-
-        for k,v in pairs(model:findModules('cudnn.Spatial_SVD_Group')) do
-         v:updateWeight(true)
-        end
-        local  batch_inputs=torch.randn(8,3,224,224):cuda() --use a small batch data to forward， and udpate weight
-         local  batch_outputs = model:forward(batch_inputs)
-        for k,v in pairs(model:findModules('cudnn.Spatial_SVD_Group')) do
-            v:updateWeight(false)
-        end
-
-        for k,v in pairs(model:findModules('cudnn.Spatial_SVD_OrthInit')) do
-         v:updateWeight(true)
-        end
-        local  batch_inputs=torch.randn(8,3,224,224):cuda() --use a small batch data to forward， and udpate weight
-         local  batch_outputs = model:forward(batch_inputs)
-        for k,v in pairs(model:findModules('cudnn.Spatial_SVD_OrthInit')) do
-            v:updateWeight(false)
-        end
-   end
-   for k,v in pairs(model:findModules('cudnn.Spatial_PN')) do
-       v:updateWeight()
-    end
 
 
    print('traing evaluation: epoch='..epoch..'----train accu='..(100-trainTop1)..'------loss_epoch='..trainLoss)

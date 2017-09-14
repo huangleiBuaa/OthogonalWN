@@ -27,10 +27,10 @@ cmd:text()
 cmd:text('Options')
 
 cmd:option('-dataset','./dataset/cifar10_original.t7','')
-cmd:option('-model','PR0_BN','')
-cmd:option('-max_epoch',200,'maximum number of iterations')
+cmd:option('-model','googlenetbn','')
+cmd:option('-max_epoch',100,'maximum number of iterations')
 cmd:option('-epoch_step',"{60,120,160}",'epoch step: no lr annealing if it is larger than the maximum')
-cmd:option('-save',"log_exp_Cifar10_ED_NoW" ,'subdirectory to save logs')
+cmd:option('-save',"log_exp_ED_NoW" ,'subdirectory to save logs')
 cmd:option('-batchSize',64,'the number of examples per batch')
 
 cmd:option('-optimMethod','sgd','the methods: options:sgd,rms,adagrad,adam')
@@ -107,6 +107,14 @@ local meanstd = {mean = {125.3, 123.0, 113.9}, std  = {63.0,  62.1,  66.7}}
     end
  end
 
+ if opt.dataset=='./dataset/cifar10_original.t7' then
+    opt.dataset_flag='Cifar10'
+ elseif opt.dataset=='./dataset/cifar100_original.t7' then
+    opt.dataset_flag='Cifar100'
+ else
+    opt.dataset_flag=''
+ end
+
 
 
 
@@ -146,15 +154,15 @@ do
 end
 
 local function log(t) print('json_stats: '..json.encode(tablex.merge(t,opt,true))) end
-baseString=opt.model..'_depth'..opt.depth
+baseString=opt.dataset_flag..opt.model..'_depth'..opt.depth
          ..'_h'..opt.hidden_number..'_lr'..opt.learningRate
-         ..'_G'..opt.m_perGroup..'_b'..opt.batchSize..'_wf'..opt.widen_factor..'_s'..opt.scaleIdentity
+         ..'_G'..opt.m_perGroup..'_b'..opt.batchSize..'_wf'..opt.widen_factor
          ..'_wD'..opt.weightDecay..'_mm'..opt.momentum
          ..'_nN'..opt.noNesterov..'_lD'..opt.learningRateDecay..'_dr'..opt.dropout
          ..'_seed'..opt.seed
 
          
-log_name='Cifar10_ED_NoW_'..baseString
+log_name='Cifar_ED_NoW_'..baseString
 opt.save=opt.save..'/'..log_name
 print('Will save at '..opt.save)
 paths.mkdir(opt.save)
@@ -374,5 +382,5 @@ v:endTraining()
 end
 
 
-torch.save('SModel_Cifar10_ED_NoW_'..baseString..'.t7', net:clearState())
+torch.save('SModel_ED_NoW_'..baseString..'.t7', net:clearState())
 end

@@ -24,7 +24,7 @@
 
 local nn = require 'nn'
 local utils = paths.dofile'utils.lua'
-require '../../../NNNetwork/module/spatial/cudnn_Spatial_Weight_DBN_Row'
+require '../../module/spatial/cudnn_Spatial_Weight_DBN_Row'
 
 assert(opt and opt.depth)
 assert(opt and opt.num_classes)

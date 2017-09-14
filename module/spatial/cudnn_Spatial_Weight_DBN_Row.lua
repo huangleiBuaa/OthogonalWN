@@ -1,4 +1,3 @@
-
 local Spatial_Weight_DBN_Row, parent =
     torch.class('cudnn.Spatial_Weight_DBN_Row', 'nn.SpatialConvolution')
 local ffi = require 'ffi'
@@ -290,17 +289,12 @@ function Spatial_Weight_DBN_Row:updateOutput(input)
 
       self.buffer:mean(weight_perGroup, 2)
 
-     -- self.buffer:fill(0)  --for test, use no centered DBN
-      self.buffer_2:repeatTensor(self.buffer, 1, n_input)
-      centered:add(weight_perGroup, -1, self.buffer_2)
+      centered:add(weight_perGroup, -1, self.buffer:expandAs(weight_perGroup))
 
        ----------------------calcualte the projection matrix----------------------
       self.buffer_1:resize(weight_perGroup:size(1),weight_perGroup:size(1))
 
       self.buffer_1:addmm(0,self.buffer_1,1/n_input,centered,centered:t()) --buffer_1 record correlation matrix
-       --print(self.groups_WDBN)
-       --print(self.eye_ngroup)
-       --print(self.eye_ngroup_last)
        if groupId ~= self.groups_WDBN then
           self.buffer_1:add(self.eye_ngroup * self.eps)
         else
@@ -310,22 +304,18 @@ function Spatial_Weight_DBN_Row:updateOutput(input)
 
    -----------------------matrix decomposition-------------
 
-      local rotation,eig,_=torch.svd(self.buffer_1) --reuse the buffer: 'buffer' record e, 'buffer_2' record V
-
-
+      local rotation,eig,_=torch.svd(self.buffer_1) 
 
       if self.debug then
           print(eig)
       end
-    scale:resizeAs(eig)
+      scale:resizeAs(eig)
       scale:copy(eig)
       scale:pow(-1/2) --scale=eig^(-1/2)
 
       self.buffer_2:resizeAs(rotation)
-    --  self.buffer_1:diag(scale)   --self.buffer_1 cache the scale matrix
-    --  self.buffer_2:mm(self.buffer_1,rotation:t()) --U= Eighta^(-1/2)*D^T
-      self.buffer_2:cmul(torch.repeatTensor(scale, (#scale)[1], 1):t(),rotation:t())
-
+      self.buffer_2:cmul(scale:view(n_output, 1):expandAs(rotation),rotation:t())
+     
       self.buffer_1:mm(rotation,self.buffer_2)
 
       self.W_perGroup:mm(self.buffer_1,centered)
@@ -337,7 +327,7 @@ function Spatial_Weight_DBN_Row:updateOutput(input)
         self.W_perGroup:mul(math.sqrt(1/n_input))
       end
 
-         ----------------record the results of per groupt--------------
+      ----------------record the results of per groupt--------------
       table.insert(self.eigs, eig)
       table.insert(self.scales, scale)
       table.insert(self.rotations, rotation)
@@ -348,43 +338,40 @@ function Spatial_Weight_DBN_Row:updateOutput(input)
 
  ---------------update main function----------------------
 
-
-
     input = makeContiguous(self, input)
     self:createIODescriptors(input)
 
-if self.isTraining then 
+    if self.isTraining then 
     -----------------------------transform----------------------
-   viewWeight(self)
-   viewW(self)
-   local n_output=self.weight:size(1)
-   local n_input=self.weight:size(2)
+        viewWeight(self)
+        viewW(self)
+        local n_output=self.weight:size(1)
+        local n_input=self.weight:size(2)
 
-    self.eigs={}
-   self.scales={}
-   self.rotations={}
-   self.centereds={}
+        self.eigs={}
+        self.scales={}
+        self.rotations={}
+        self.centereds={}
 
-   -- buffers that are reused
-   self.buffer = self.buffer or input.new()
-   self.buffer_1 = self.buffer_1 or input.new()
-   self.buffer_2 = self.buffer_2 or input.new()
+        self.buffer = self.buffer or input.new()
+        self.buffer_1 = self.buffer_1 or input.new()
+        self.buffer_2 = self.buffer_2 or input.new()
 
-   self.output=self.output or input.new()
-   self.W=self.W or input.new()
-   self.W:resizeAs(self.weight)
+        self.output=self.output or input.new()
+        self.W=self.W or input.new()
+        self.W:resizeAs(self.weight)
 
 
-      for i=1,self.groups_WDBN do
-         local start_index=(i-1)*self.m_perGroup+1
-         local end_index=math.min(i*self.m_perGroup,n_output)
-         self.W[{{start_index,end_index},{}}]=updateOutput_perGroup(self.weight[{{start_index,end_index},{}}],i)
-      end
+        for i=1,self.groups_WDBN do
+             local start_index=(i-1)*self.m_perGroup+1
+            local end_index=math.min(i*self.m_perGroup,n_output)
+            self.W[{{start_index,end_index},{}}]=updateOutput_perGroup(self.weight[{{start_index,end_index},{}}],i)
+        end
 
  
-   unviewW(self)
-   unviewWeight(self)
-end
+         unviewW(self)
+        unviewWeight(self)
+    end
 
 
 
@@ -464,8 +451,8 @@ end
 
  function updateAccGradParameters_perGroup(gradW_perGroup, groupId)
 
-       local n_output=gradW_perGroup:size(1)
-      local n_input=gradW_perGroup:size(2)
+    local n_output=gradW_perGroup:size(1)
+    local n_input=gradW_perGroup:size(2)
      local  eig=self.eigs[groupId]
      local  scale=self.scales[groupId]
      local  rotation=self.rotations[groupId]
@@ -487,9 +474,7 @@ end
      self.M:resizeAs(rotation)
      self.S:resizeAs(rotation)
      self.FC:resizeAs(rotation)
- --  self.buffer:diag(scale)
-   --  self.U:mm( self.buffer,rotation:t())
-     self.U:cmul( torch.repeatTensor(scale, (#scale)[1], 1):t(),rotation:t())
+      self.U:cmul(scale:view(n_output, 1):expandAs(rotation),rotation:t())
 
      self.hat_x:mm( self.U,centered)
      self.d_hat_x:mm(rotation:t(),gradW_perGroup)
@@ -499,8 +484,6 @@ end
 
 
        local sz = (#self.FC)[1]
-   --  local temp_diag=torch.diag(self.FC) --get the diag element of d_EighTa
-   -- self.M:diag(temp_diag) --matrix form
 
       local temp_mask
      if groupId == self.groups_WDBN then
@@ -511,17 +494,16 @@ end
      self.M = self.FC:clone():maskedFill(torch.eq(temp_mask, 0), 0)
 
  --------------------------------calculate S-----------------------------
-   --  self.buffer:diag(self.eig)
-    -- self.S:mm(self.buffer, self.FC:t())
-     self.S:cmul(self.FC:t(), torch.repeatTensor(eig, sz, 1):t())
+     self.S:cmul(self.FC:t(), eig:view(sz, 1):expandAs(self.FC))
+
+     
      self.buffer:resizeAs(eig):copy(eig):pow(1/2)
-     self.buffer_1:cmul(self.FC, torch.repeatTensor(self.buffer, sz, 1):t())
-     self.buffer_2:cmul(self.buffer_1, torch.repeatTensor(self.buffer, sz, 1))
+     self.buffer_1:cmul(self.FC, self.buffer:view(sz, 1):expandAs(self.FC))
+
+     self.buffer_2:cmul(self.buffer_1, self.buffer:view(1, sz):expandAs(self.buffer_1))
      self.S:add(self.buffer_2)
 
      self.buffer=getK(eig,groupId == self.groups_WDBN)
-
-
 
      self.S:cmul(self.buffer:t())
      self.buffer:copy(self.S)
@@ -531,13 +513,8 @@ end
      self.buffer_1:resizeAs(self.d_hat_x)
      self.buffer_1:mm( self.S:t(),self.hat_x) --(S-M)*self.hat_x
 
-     self.buffer:repeatTensor(self.f, 1, n_input)
-     self.buffer_1:add(self.d_hat_x):add(-1, self.buffer)
+     self.buffer_1:add(self.d_hat_x):add(-1, self.f:expandAs(self.d_hat_x))
 
-
-
-
-   -- self.S:resizeAs(self.buffer_1):mm(self.buffer_1, self.M:diag(scale)) -- for debug
     self.gradWeight_perGroup:mm( self.U:t(),self.buffer_1)
 
 

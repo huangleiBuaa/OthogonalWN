@@ -27,7 +27,7 @@ cmd:text('compare the Decorelated BatchNormalizaiton method with baselines on ML
 cmd:text()
 cmd:text('Options')
 
-cmd:option('-model','sgd','the methods: options:WNorm, WBN_Row,WCBN_Row,WGC,WO_Row,WO_Row_batch,WOBN_Row')
+cmd:option('-model','OLM','the methods: options:WNorm, WBN_Row,WCBN_Row,WGC,WO_Row,WO_Row_batch,WOBN_Row')
 cmd:option('-mode_nonlinear',2,'nonlinear module: 1 indicates tanh, 0 indicates sigmoid, 2 indecates Relu')
 cmd:option('-max_epoch',200,'maximum number of iterations')
 cmd:option('-n_hidden_number',100,'the dimension of the hidden laysers')
@@ -35,7 +35,7 @@ cmd:option('-save',"log_MLP_WDBN_MNIST" ,'subdirectory to save logs')
 cmd:option('-inputScaled',true,'whether preoprocess the input, scale to (0,1)')
 cmd:option('-inputCentered',true,'whether preoprocess the input, minus the mean')
 
-cmd:option('-batchSize',256,'the number of examples per batch')
+cmd:option('-batchSize',1024,'the number of examples per batch')
 cmd:option('-learningRate',1,'learning rate')
 cmd:option('-weightDecay',0,'weight Decay for regularization')
 cmd:option('-momentum',0,'momentum')
@@ -231,7 +231,7 @@ print(model)
 
  -- local tic = torch.tic()
   for t,v in ipairs(indices) do
-    xlua.progress(t, #indices)
+   -- xlua.progress(t, #indices)
 
     local inputs = trainData.data:index(1,v)
     targets:copy(trainData.labels:index(1,v))

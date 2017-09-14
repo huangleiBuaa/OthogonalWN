@@ -128,7 +128,7 @@ function create_model(opt)
 
 -----------------------------------------model configure-------------------
 
-  if opt.model=='sgd' then 
+  if opt.model=='plain' then 
        model:add(linear(opt.n_inputs,cfg_hidden[1]))
     for i=1,n do
        if i==n then
@@ -149,7 +149,7 @@ function create_model(opt)
        end
      end
 
- elseif opt.model=='WN_Row' then   
+ elseif opt.model=='WN' then   
      model:add(nn.Linear_Weight_BN_Row(opt.n_inputs,cfg_hidden[1]))
      for i=1,n do
        if i==n then
@@ -158,7 +158,7 @@ function create_model(opt)
          model:add(block_WN_Row(cfg_hidden[i],cfg_hidden[i+1])) 
        end
      end 
- elseif opt.model=='WN_Row_scale' then
+ elseif opt.model=='WN_scale' then
 
      model:add(nn.Linear_Weight_BN_Row(opt.n_inputs,cfg_hidden[1]))
      model:add(module_affine(cfg_hidden[1],1,true))
@@ -169,7 +169,7 @@ function create_model(opt)
          model:add(block_WN_Row_scale(cfg_hidden[i],cfg_hidden[i+1]))
        end
      end
-   elseif opt.model=='WDBN_Row' then   
+   elseif opt.model=='OLM' then   
 
      model:add(nn.Linear_Weight_DBN_Row_Group(opt.n_inputs,cfg_hidden[1],opt.m_perGroup))
      for i=1,n do
@@ -179,7 +179,7 @@ function create_model(opt)
          model:add(block_WDBN_Row(cfg_hidden[i],cfg_hidden[i+1])) 
        end
      end 
-   elseif opt.model=='WDBN_Row_scale' then
+   elseif opt.model=='OLM_scale' then
 
      model:add(nn.Linear_Weight_DBN_Row_Group(opt.n_inputs,cfg_hidden[1],opt.m_perGroup))
      model:add(module_affine(cfg_hidden[1],1,true))
@@ -192,7 +192,7 @@ function create_model(opt)
      end
 
       
-   elseif opt.model=='WN_Row_batch' then
+   elseif opt.model=='WN_batch' then
 
      model:add(nn.Linear_Weight_BN_Row(opt.n_inputs,cfg_hidden[1]))
      for i=1,n do
@@ -203,7 +203,7 @@ function create_model(opt)
        end
      end
  
-   elseif opt.model=='WN_Row_scale_batch' then
+   elseif opt.model=='WN_scale_batch' then
 
      model:add(nn.Linear_Weight_BN_Row(opt.n_inputs,cfg_hidden[1]))
      model:add(module_affine(cfg_hidden[1],1,true))
@@ -215,7 +215,7 @@ function create_model(opt)
        end
      end
  
-   elseif opt.model=='WDBN_Row_batch' then
+   elseif opt.model=='OLM_batch' then
 
      model:add(nn.Linear_Weight_DBN_Row_Group(opt.n_inputs,cfg_hidden[1],opt.m_perGroup))
    --  model:add(module_affine(cfg_hidden[1],1,true))
@@ -227,7 +227,7 @@ function create_model(opt)
        end
      end
  
-   elseif opt.model=='WDBN_Row_scale_batch' then
+   elseif opt.model=='OLM_scale_batch' then
 
      model:add(nn.Linear_Weight_DBN_Row_Group(opt.n_inputs,cfg_hidden[1],opt.m_perGroup))
      model:add(module_affine(cfg_hidden[1],1,true))
