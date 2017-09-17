@@ -10,72 +10,51 @@ luarocks install optnet
 
 ## Experiments in the paper
 
-#### 1. MLP architecture over SVHN dataset
+#### 1.  Reproduce the results for sovling OMSDM problem:
 
-* Dataset prepraration, by running:
+*	run script:: 
 ```Bash
-  cd dataset
-   th preProcess_div256.lua
+ bash 0_execute_MLP_MNIST_b1024.sh
  ```
-We get the preprocessed SVHN dataset for MLP architecture.
-Note that this script is based on the [Torch script for SVHN](https://github.com/torch/tutorials/blob/master/A_datasets/svhn.lua)
-
-*	Execute: 
-```Bash
- th exp_MLP.lua 
- ```
-
-*	To reproduce the experimental results, you can run the script below, which include all the information of experimental configuration: 
-```Bash
- bash 1_execute_MLP_svhn.sh  
- bash 1_execute_MLP_svhn_adam.sh  
- ```
-
-#### 2. VGG-A architecture over Cifar-10 dataset
-* Dataset preparations: the dataset is based on the preprocessed script on: https://github.com/szagoruyko/cifar.torch, and put the data file in the directory: './dataset/cifar_provider.t7'
+This script will download MNIST dataset automatically.
+	you can try more small learning rate, and add more layer, or use different batch size based on this script.
+	
+#### 2. Reproduce the results on MLP architecture:
+* Dataset preparations: you should download the [PIE dataset](https://www.dropbox.com/sh/5pkrtv02wemqxzp/AADlVOs3vDMOEsOpRFa20Uqha?dl=0), and put the data file in the directory: './dataset/'
 
 * Execute:
 ```Bash
- th exp_vggA.lua –dataPath './dataset/cifar_provider.t7'
+  bash 1_execute_MLP_PIE_sgd.sh   
+	  bash 1_execute_MLP_PIE_adam.sh
  ```
- *	To reproduce the experimental results, you can run the script below, which include all the information of experimental configuration: 
-```Bash
- bash   2_execute_Conv_CIFAR10_vggA.sh
- ```
+-----------------------------Note that the experiment above is under MLP and run on CPU, so Magga is not necessary for above experiemnt --------------------
  
-#### 3. GoogLeNet architecture over Cifar datasets
+#### 3. Reproduce the results on VGG style, BN-Incption and Wide residual network over CIFAR datset: 
 
- *	Dataset preparations: The dataset is based on [whitened CIFAR datasets](https://yadi.sk/d/em4b0FMgrnqxy).  
+ *	Dataset preparations: you should download the [CIFAR-10](https://yadi.sk/d/eFmOduZyxaBrT) and [CIFAR-100](https://yadi.sk/d/ZbiXAegjxaBcM) datasets, and put the data file in the directory: './dataset/' 
  * Execute: 
 ```Bash
 th exp_GoogleNet_dataWhitening.lua –dataPath './dataset/cifar100_whitened.t7'
  ```
   *	To reproduce the experimental results, you can run the script below, which include all the information of experimental configuration: 
 ```Bash
- 3_execute_Conv_CIFAR100_GoogLeNet.sh 
+  bash 2_execute_Conv_CIFAR_VggStyle.sh  
+  bash 3_execute_Conv_CIFAR_BNInception.sh 
+  bash 4_execute_Conv_CIFAR_wr.sh  
  ```
  
- 
-  The GoogLeNet model is based on the project on: https://github.com/soumith/imagenet-multiGPU.torch
 
-#### 4. Residual network architecture over Cifar datasets
 
- *	Dataset preparations: The dataset is based on [original CIFAR datasets](https://yadi.sk/d/eFmOduZyxaBrT), and the data file should put in the directory: ./dataset/cifar_original.t7.  
- *	Execute: 
+#### 4. Run the experiment on imageNet dataset. 
+
+ *  (1) you should clone the facebook residual network project from:https://github.com/facebook/fb.resnet.torch
+ *  (2) you should download imageNet dataset and put it on: '/tmp/dataset/imageNet/' directory (you also can change the Path, and change in 'opts_imageNet.lua' respectively)
+ *  (3) copy  'opts_imageNet.lua', 'exp_Conv_imageNet_expDecay.lua', 'train_expDecay.lua', 'module' and 'models' to the project's root path.
+ *  (4)	Execute: 
 ```Bash
-th exp_res_dataNorm.lua –dataPath './dataset/cifar10_original.t7'
+th exp_Conv_imageNet_expDecay.lua -model imagenet/resnet_OLM_L1
  ```
-   *	To reproduce the experimental results, you can run the script below, which include all the information of experimental configuration: 
-```Bash
-4_execute_Conv_CIFAR10_resnet.sh
- ```
- 
-  The normlization of Cifar dataset is in the script th exp_res_dataNorm.lua. The residual network model and respective script are based on [facebook ResNet](https://github.com/facebook/fb.resnet.torch).
-
-####  5. GoogLeNet over ImageNet
-This experiment is based on the project at: https://github.com/soumith/imagenet-multiGPU.torch.
-<br>
-The proposed model are in: './models/imagenet/'
+you can change respective model by pass  the parameter 'model'
 
 ## Contact
 huanglei@nlsde.buaa.edu.cn, Any discussions and suggestions are welcome!
