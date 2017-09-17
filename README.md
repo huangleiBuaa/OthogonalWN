@@ -1,21 +1,12 @@
-Centered Weight Normalization
+Orthogonal Weight Normalization
 ======================================
-
-This project is the code of the paper: Centered Weight Normalization  in Accelerating Training of Deep Neural Networks ( ICCV 2017).
-* bibtex:
-```Bash
-@INPROCEEDINGS{Huang2017ICCV,
-    author = {Lei Huang and Xianglong Liu and Yang Liu and  Bo Lang and Dacheng Tao},
-    title = {Centered Weight Normalization  in Accelerating Training of Deep Neural Networks},
-    booktitle = {ICCV},
-    year = {2017}}
- ```
 ## Requirements and Dependency
 * install [Torch](http://torch.ch) with CUDA GPU
 * install [cudnn v5](http://torch.ch)
 * install dependent lua packages optnet by run:
 luarocks install optnet
-
+* install Magga (you can follow the instruction as in the file of ['Install Magga.txt'](./Install_Magga.txt) )
+	Note: Magga is used for the SVD on GPU. if you don't install Magga, you can not run the code on GPU (For all the experiment on CNNs, we run the experiment on GPU )
 
 ## Experiments in the paper
 
