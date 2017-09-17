@@ -1,3 +1,15 @@
+--[[
+----This file implements the CayT transform with Riemannian graident in Canonical inner product 
+----into the linear module  for 2D input used in MLP architecture. 
+----
+---------------------------------------------------------------------
+----Author: Lei Huang 
+----mail: huanglei@nlsde.buaa.edu.cn
+-----
+----]]
+--]]
+
+
 local Linear_Weight_CayT, parent = torch.class('nn.Linear_Weight_CayT', 'nn.Module')
 
 function Linear_Weight_CayT:__init(inputSize, outputSize,lr, orth_flag,isBias)

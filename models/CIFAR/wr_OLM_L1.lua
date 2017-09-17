@@ -18,7 +18,7 @@
 
 --[[
 --  this model is originally from: https://github.com/szagoruyko/wide-residual-networks
---    We replace the first SpatialConvolution layer with our Orthogonal rectangular weight layer
+--    We replace the first SpatialConvolution layer with our Orthogonal Liner_module
 --]]
 
 

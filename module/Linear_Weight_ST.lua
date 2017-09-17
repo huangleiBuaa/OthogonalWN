@@ -1,3 +1,14 @@
+--[[
+----This file implements QR style retraction with Riemannian graident inm Euclidean inner product
+----into the linear module  for 2D input used in MLP architecture. 
+----
+---------------------------------------------------------------------
+----Author: Lei Huang 
+----mail: huanglei@nlsde.buaa.edu.cn
+-----
+----]]
+--]]
+
 local Linear_Weight_ST, parent = torch.class('nn.Linear_Weight_ST', 'nn.Module')
 
 function Linear_Weight_ST:__init(inputSize, outputSize,lr,orth_flag,isBias)
