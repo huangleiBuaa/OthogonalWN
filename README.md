@@ -17,7 +17,7 @@ luarocks install optnet
  bash 0_execute_MLP_MNIST_b1024.sh
  ```
 This script will download MNIST dataset automatically.
-	You can try more small learning rate, and add more layer, or use different batch size based on this script.
+You can try more small learning rate, and add more layer, or use different batch size based on this script.
 	
 #### 2. Reproduce the results on MLP architecture:
 * Dataset preparations: you should download the [PIE dataset](https://www.dropbox.com/sh/5pkrtv02wemqxzp/AADlVOs3vDMOEsOpRFa20Uqha?dl=0), and put the data file in the directory: './dataset/'
@@ -25,9 +25,9 @@ This script will download MNIST dataset automatically.
 * Execute:
 ```Bash
   bash 1_execute_MLP_PIE_sgd.sh   
-	  bash 1_execute_MLP_PIE_adam.sh
+  bash 1_execute_MLP_PIE_adam.sh
  ```
------------------------------Note that the experiment above is under MLP and run on CPU, and therefore Magga is not necessary for above experiemnt --------------------
+-----------------------------Note that the experiment above is under MLP and run on CPU, and therefore it is not necessary to install Magga for above experiemnt --------------------
  
 #### 3. Reproduce the results on VGG style, BN-Incption and Wide residual network over CIFAR datset: 
 
@@ -48,7 +48,7 @@ th exp_GoogleNet_dataWhitening.lua –dataPath './dataset/cifar100_whitened.t7'
 #### 4. Run the experiment on imageNet dataset. 
 
  *  (1) You should clone the facebook residual network project from:https://github.com/facebook/fb.resnet.torch
- *  (2) You should download imageNet dataset and put it on: '/tmp/dataset/imageNet/' directory (you also can change the Path, and change in 'opts_imageNet.lua' respectively)
+ *  (2) You should download imageNet dataset and put it on: '/tmp/dataset/imageNet/' directory (you also can change the path, which is set in 'opts_imageNet.lua')
  *  (3) Copy  'opts_imageNet.lua', 'exp_Conv_imageNet_expDecay.lua', 'train_expDecay.lua', 'module' and 'models' to the project's root path.
  *  (4)	Execute: 
 ```Bash
