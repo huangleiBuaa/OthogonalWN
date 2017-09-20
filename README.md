@@ -1,5 +1,17 @@
 Orthogonal Weight Normalization
 ======================================
+
+This project is the Torch implementation of the paper : orthogonal weight normalization method for solving orthogonality constraints over Steifel manifold in deep neural networks (arXiv:1709.06079 )
+* bibtex:
+```Bash
+@article{Huang2017ICCV,
+    author = {Lei Huang and Xianglong Liu and  Bo Lang and Admas Wei Yu and Bo Li},
+    title = {Orthogonal Weight Normalization: Solution to Optimization over Multiple Dependent Stiefel Manifolds in Deep Neural Networks},
+   journal   = {CoRR},
+  volume    = {abs/1709.06079},
+  year      = {2017}}
+ ```
+ 
 ## Requirements and Dependency
 * Install [Torch](http://torch.ch) with CUDA GPU
 * Install [cudnn v5](http://torch.ch)
