@@ -1,7 +1,7 @@
 Orthogonal Weight Normalization
 ======================================
 
-This project is the Torch implementation of the paper : orthogonal weight normalization method for solving orthogonality constraints over Steifel manifold in deep neural networks (arXiv:1709.06079 )
+This project is the Torch implementation of the paper : Orthogonal Weight Normalization: Solution to Optimization over Multiple Dependent Stiefel Manifolds in Deep Neural Networks (arXiv:1709.06079 )
 * bibtex:
 ```Bash
 @article{Huang_2017_arxiv,
