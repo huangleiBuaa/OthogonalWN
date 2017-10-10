@@ -24,7 +24,7 @@ luarocks install optnet
 
 #### 1.  Reproduce the results for sovling OMSDM problem:
 
-*	Run script:: 
+*	Run script:
 ```Bash
  bash 0_execute_MLP_MNIST_b1024.sh
  ```
@@ -44,10 +44,8 @@ You can try more small learning rate, and add more layer, or use different batch
 #### 3. Reproduce the results on VGG style, BN-Incption and Wide residual network over CIFAR datset: 
 
  *	Dataset preparations: you should download the [CIFAR-10](https://yadi.sk/d/eFmOduZyxaBrT) and [CIFAR-100](https://yadi.sk/d/ZbiXAegjxaBcM) datasets, and put the data file in the directory: './dataset/' 
- * Execute: 
-```Bash
-th exp_GoogleNet_dataWhitening.lua –dataPath './dataset/cifar100_whitened.t7'
- ```
+ 
+
   *	To reproduce the experimental results, you can run the script below, which include all the information of experimental configurations: 
 ```Bash
   bash 2_execute_Conv_CIFAR_VggStyle.sh  
@@ -66,7 +64,7 @@ th exp_GoogleNet_dataWhitening.lua –dataPath './dataset/cifar100_whitened.t7'
 ```Bash
 th exp_Conv_imageNet_expDecay.lua -model imagenet/resnet_OLM_L1
  ```
-You can training other respective model by using the parameter 'model'
+You can training other respective models by using the parameter '-model'
 
 ## Contact
 huanglei@nlsde.buaa.edu.cn, Any discussions and suggestions are welcome!
