@@ -52,7 +52,9 @@ You can try more small learning rate, and add more layer, or use different batch
   bash 3_execute_Conv_CIFAR_BNInception.sh 
   bash 4_execute_Conv_CIFAR_wr.sh  
  ```
- 
+ The Inception model is based on the project on: https://github.com/soumith/imagenet-multiGPU.torch.
+
+The wide residual network model is based on the facebook torch project: https://github.com/szagoruyko/wide-residual-networks
 
 
 #### 4. Run the experiment on imageNet dataset. 
