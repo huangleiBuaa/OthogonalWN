@@ -5,7 +5,7 @@ This project is the Torch implementation of the paper : Orthogonal Weight Normal
 * bibtex:
 ```Bash
 @article{Huang_2017_arxiv,
-    author = {Lei Huang and Xianglong Liu and  Bo Lang and Admas Wei Yu and Bo Li},
+    author = {Lei Huang and Xianglong Liu and  Bo Lang and Adams Wei Yu and Bo Li},
     title = {Orthogonal Weight Normalization: Solution to Optimization over Multiple Dependent Stiefel Manifolds in Deep Neural Networks},
    journal   = {CoRR},
   volume    = {abs/1709.06079},
