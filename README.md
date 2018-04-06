@@ -17,8 +17,8 @@ This project is the Torch implementation of the paper : Orthogonal Weight Normal
 * Install [cudnn v5](http://torch.ch)
 * Install dependent lua packages optnet by run:
 luarocks install optnet
-* Install Magga (you can follow the instruction in the file  ['Install Magga.txt'](./Install_Magga.txt) )
-	Note: Magga is used for the SVD on GPU. If you don't install Magga, you can not run the code on GPU (For all the experiment on CNNs, we run the experiment on GPU)
+* Install Magma (you can follow the instruction in the file  ['Install Magma.txt'](./Install_Magga.txt) )
+	Note: Magma is used for the SVD on GPU. If you don't install Magma, you can not run the code on GPU (For all the experiment on CNNs, we run the experiment on GPU)
 
 ## Experiments in the paper
 
@@ -39,7 +39,7 @@ You can try more small learning rate, and add more layer, or use different batch
   bash 1_execute_MLP_PIE_sgd.sh   
   bash 1_execute_MLP_PIE_adam.sh
  ```
------------------------------Note that the experiment above is under MLP and run on CPU, and therefore it is not necessary to install Magga for above experiemnt --------------------
+-----------------------------Note that the experiment above is under MLP and run on CPU, and therefore it is not necessary to install Magma for above experiemnt --------------------
  
 #### 3. Reproduce the results on VGG style, BN-Incption and Wide residual network over CIFAR datset: 
 
