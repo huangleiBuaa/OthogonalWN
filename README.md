@@ -28,11 +28,11 @@ luarocks install optnet
 ```Bash
  bash 0_execute_MLP_MNIST_b1024.sh
  ```
-This script will download MNIST dataset automatically.
+This script will download MNIST dataset automatically and you should put the 'mnist.t7'(directory) to the './dataset/' directory. 
 You can try more small learning rate, and add more layer, or use different batch size based on this script.
 	
 #### 2. Reproduce the results on MLP architecture:
-* Dataset preparations: you should download the [PIE dataset](https://www.dropbox.com/sh/5pkrtv02wemqxzp/AADlVOs3vDMOEsOpRFa20Uqha?dl=0), and put the data file in the directory: './dataset/'
+* Dataset preparations: you should download the [PIE dataset](https://www.dropbox.com/sh/5pkrtv02wemqxzp/AADlVOs3vDMOEsOpRFa20Uqha?dl=0), and put the data file in the directory: './dataset/' (The final paths of the data files are:'./dataset/PIE/PIE_train.dat' and './dataset/PIE/PIE_test.dat')
 
 * Execute:
 ```Bash
