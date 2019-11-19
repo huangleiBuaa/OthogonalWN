@@ -12,6 +12,13 @@ This project is the Torch implementation of the paper : Orthogonal Weight Normal
   year      = {2017}}
  ```
  
+ ### Updates
+* Add the [' pytorch module'](./module_pytorch/OWN.py)  of OWN.     2019-11-23.
+
+
+
+ 
+ 
 ## Requirements and Dependency
 * Install [Torch](http://torch.ch) with CUDA GPU
 * Install [cudnn v5](http://torch.ch)
