@@ -66,6 +66,14 @@ class OWN_Conv2d(torch.nn.Conv2d):
             # self.scale = Variable(self.scale, requires_grad=False)
             self.register_buffer('WNScale', self.scale_)
 
+
+    def forward(self, input_f: torch.Tensor) -> torch.Tensor:
+        weight_q = self.weight_normalization(self.weight)
+        weight_q = weight_q * self.WNScale
+        out = F.conv2d(input_f, weight_q, self.bias, self.stride, self.padding, self.dilation, self.groups)
+        return out
+
+
 if __name__ == '__main__':
     oni_ = OWNNorm(norm_groups=2)
     print(oni_)
